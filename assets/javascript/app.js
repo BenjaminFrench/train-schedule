@@ -32,8 +32,8 @@ ref.on("child_added", function (snapshot) {
     trainFrequency = snapshot.val().trainFrequency;
     trainFirstTime = snapshot.val().trainFirstTime;
 
-    let currentDate = moment();
-    let startDate = moment(trainFirstTime, "DD/MM/YYYY");
+    let currentTime = moment();
+    let momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
 
     // need to calculate
     let trainNextArrival = "5:00 PM";
@@ -73,11 +73,22 @@ $('#add-train-btn').on('click', function (event) {
     let trainDestination = $("#TrainDestination").val().trim();
     let trainFirstTime = $("#TrainFirstTime").val().trim();
     let trainFrequency = $("#TrainFrequency").val().trim();
+    let arrivalTimes = [];
+    // calculate array of train arrival times
+    let momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
+
+    arrivalTimes.push(trainFirstTime);
+    
+    // add frequency to time, push time to array, stop if we get to the next day
+    while (parseInt(momentTrainFirstTime.add(parseInt(trainFrequency), "m").format("d")) < 1) {
+        arrivalTimes.push(momentTrainFirstTime.format("HH:mm"));
+    }
 
     ref.push({
         trainName,
         trainDestination,
         trainFirstTime,
-        trainFrequency
+        trainFrequency,
+        arrivalTimes
     });
 });
