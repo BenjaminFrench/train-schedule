@@ -31,13 +31,28 @@ ref.on("child_added", function (snapshot) {
     trainDestination = snapshot.val().trainDestination;
     trainFrequency = snapshot.val().trainFrequency;
     trainFirstTime = snapshot.val().trainFirstTime;
+    let trainArrivalTimes = snapshot.val().trainArrivalTimes;
 
-    let currentTime = moment();
-    let momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
+    var currentTime = moment();
+    currentTime = moment(currentTime.format("HH:mm"), "HH:mm");
+    var momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
+
+    var trainMinutesAway = null;
+    var trainNextArrival = null;
+    
 
     // need to calculate
-    let trainNextArrival = "5:00 PM";
-    let trainMinutesAway = "5";
+    for (let index = 0; index < trainArrivalTimes.length; index++) {
+        const element = trainArrivalTimes[index];
+        let difference = moment(element, "HH:mm").diff(currentTime, "minutes");
+        if (difference >= 0) {
+            trainNextArrival = moment(element, "HH:mm").format("hh:mm A");
+            trainMinutesAway = difference;
+            break;
+        }
+        
+    }
+
 
     let print = `
            <tr id="train-${trainName}">
@@ -73,15 +88,15 @@ $('#add-train-btn').on('click', function (event) {
     let trainDestination = $("#TrainDestination").val().trim();
     let trainFirstTime = $("#TrainFirstTime").val().trim();
     let trainFrequency = $("#TrainFrequency").val().trim();
-    let arrivalTimes = [];
+    let trainArrivalTimes = [];
     // calculate array of train arrival times
     let momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
 
-    arrivalTimes.push(trainFirstTime);
+    trainArrivalTimes.push(trainFirstTime);
     
     // add frequency to time, push time to array, stop if we get to the next day
     while (parseInt(momentTrainFirstTime.add(parseInt(trainFrequency), "m").format("d")) < 1) {
-        arrivalTimes.push(momentTrainFirstTime.format("HH:mm"));
+        trainArrivalTimes.push(momentTrainFirstTime.format("HH:mm"));
     }
 
     ref.push({
@@ -89,6 +104,6 @@ $('#add-train-btn').on('click', function (event) {
         trainDestination,
         trainFirstTime,
         trainFrequency,
-        arrivalTimes
+        trainArrivalTimes
     });
 });
