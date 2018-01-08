@@ -33,15 +33,17 @@ ref.on("child_added", function (snapshot) {
     trainFirstTime = snapshot.val().trainFirstTime;
     let trainArrivalTimes = snapshot.val().trainArrivalTimes;
 
+    // get current time and remove any time data other than HH:mm
     var currentTime = moment();
     currentTime = moment(currentTime.format("HH:mm"), "HH:mm");
+
     var momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
 
     var trainMinutesAway = null;
     var trainNextArrival = null;
     
 
-    // need to calculate
+    // calculate next arrival
     for (let index = 0; index < trainArrivalTimes.length; index++) {
         const element = trainArrivalTimes[index];
         let difference = moment(element, "HH:mm").diff(currentTime, "minutes");
@@ -50,7 +52,6 @@ ref.on("child_added", function (snapshot) {
             trainMinutesAway = difference;
             break;
         }
-        
     }
 
 
@@ -89,9 +90,9 @@ $('#add-train-btn').on('click', function (event) {
     let trainFirstTime = $("#TrainFirstTime").val().trim();
     let trainFrequency = $("#TrainFrequency").val().trim();
     let trainArrivalTimes = [];
+
     // calculate array of train arrival times
     let momentTrainFirstTime = moment(trainFirstTime, "HH:mm");
-
     trainArrivalTimes.push(trainFirstTime);
     
     // add frequency to time, push time to array, stop if we get to the next day
